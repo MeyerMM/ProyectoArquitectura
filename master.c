@@ -66,9 +66,9 @@ int main(int argc, char *argv[]){
     if(numeroDatos%numeroMaps != 0){
         datosPorMap++;
     }
-    
-    printf("\n numero de maps a usar: %i", numeroDatos/datosPorMap);
     printf("\n datos por map: %i", datosPorMap);
+    printf("\n numero de maps a usar: %i", numeroDatos/datosPorMap);
+    
     
     int acumDatos =0;
     for(int i = 0 + numeroMaster + numeroReduce; i<numeroProcesos; i++){
