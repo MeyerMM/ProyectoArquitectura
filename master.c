@@ -38,7 +38,7 @@ int escribirResultados(int resultados[], int numeroDatos){
 int main(int argc, char *argv[]){
 	FILE *logStream;
     char nombreLog[] = "Log.csv";
-    stream = fopen(nombreLog, "w");
+    logStream = fopen(nombreLog, "w");
     
     double tiempoInicio = MPI_Wtime();
     
