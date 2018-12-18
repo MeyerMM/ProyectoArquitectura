@@ -23,20 +23,22 @@ int contarDatos(){
 
 int escribirResultados(int resultados[], int numeroDatos){
     FILE *stream;
-    char nombreArchivo[] = "Porcentajes.csv";
-    stream = fopen(nombreArchivo, "w");
+    char nombreOutput[] = "Porcentajes.csv";
+    stream = fopen(nombreOutput, "w");
     
     for(int i = 1; i < 10; i++){
         fprintf(stream, "\nPorcentaje de datos que inician con digito %i: %g%\n", i, 100.0*((float)resultados[i])/numeroDatos);
     }
     
     fclose(stream);
-    printf("\nResultados guardados en Porcentajes.csv\n");
     return numeroDatos;
     
 }
  
 int main(int argc, char *argv[]){
+	FILE *logStream;
+    char nombreLog[] = "Log.csv";
+    stream = fopen(nombreLog, "w");
     
     double tiempoInicio = MPI_Wtime();
     
@@ -60,14 +62,14 @@ int main(int argc, char *argv[]){
     
     
     contarDatos();
-    printf("\n numero de datos: %i", numeroDatos);
+    fprintf(logStream, "\n numero de datos: %i", numeroDatos);
     
     datosPorMap = numeroDatos/numeroMaps;
     if(numeroDatos%numeroMaps != 0){
         datosPorMap++;
     }
-    printf("\n datos por map: %i", datosPorMap);
-    printf("\n numero de maps a usar: %i", numeroDatos/datosPorMap);
+    fprintf(logStream, "\n datos por map: %i", datosPorMap);
+    fprintf(logStream, "\n numero de maps a usar: %i", numeroDatos/datosPorMap);
     
     
     int acumDatos =0;
@@ -98,12 +100,13 @@ int main(int argc, char *argv[]){
     }
     
     escribirResultados(resultados, numeroDatos);
-
+	fprintf(logStream, "\nResultados guardados en Porcentajes.csv\n");
 
     MPI_Finalize();
     
     double tiempoFin = MPI_Wtime();
-    printf("\n El programa tomo %g segundos en ejecutar\n", tiempoFin - tiempoInicio);
+    fprintf(logStream, "\n El programa tomo %g segundos en ejecutar\n", tiempoFin - tiempoInicio);
+	fclose(logStream);
     return 0;
 }
  
