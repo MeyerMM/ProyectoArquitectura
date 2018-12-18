@@ -65,12 +65,7 @@ int main(int argc, char *argv[])
     if(status.MPI_TAG == 1){
         //printf("\n Map de id %i evalua datos desde %i (inclusive) a %i \n", idProceso, rangoDeDatosAEvaluar[0], rangoDeDatosAEvaluar[1]);
         datos = calloc(rangoDeDatosAEvaluar[1] - rangoDeDatosAEvaluar[0], sizeof(int));
-        leerDatos(rangoDeDatosAEvaluar[0], rangoDeDatosAEvaluar[1]);
-        
-        
-        for(int i = 0; i < (rangoDeDatosAEvaluar[1] - rangoDeDatosAEvaluar[0]); i++){
-        }
-        
+        leerDatos(rangoDeDatosAEvaluar[0], rangoDeDatosAEvaluar[1]);     
         
         for(int i = 0; i < (rangoDeDatosAEvaluar[1] - rangoDeDatosAEvaluar[0]); i++){
             int datoEnEvaluacion = datos[i];
@@ -81,7 +76,7 @@ int main(int argc, char *argv[])
             }
             map[digitoEnEvaluacion]++;
         }
-    
+		free(datos);
         for(int i = 1; i < 10; i++){
            // printf("\n Número de datos que empiezan por %i: %i \n", i,  map[i]);
             MPI_Reduce(&(map[i]), &(map[i]), 1, MPI_INT, MPI_SUM, i, MPI_COMM_WORLD);

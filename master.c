@@ -97,8 +97,10 @@ int main(int argc, char *argv[]){
         MPI_Recv(&(resultados[i]), 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
     }
     
-    escribirResultados(resultados, numeroDatos);
-
+    //escribirResultados(resultados, numeroDatos);
+	for(int i = 1; i < 10; i++){
+		printf("\nPorcentaje de datos que inician con digito %i: %g%\n", i, 100.0*((float)resultados[i])/numeroDatos);
+    }
 
     MPI_Finalize();
     
