@@ -67,7 +67,7 @@ int main(int argc, char *argv[]){
         datosPorMap++;
     }
     printf("\n datos por map: %i", datosPorMap);
-    printf("\n numero de maps a usar: %i", numeroDatos/datosPorMap);
+    printf("\n numero de maps a usar: %i", numeroMaps);
     
     
     int acumDatos =0;
@@ -80,6 +80,7 @@ int main(int argc, char *argv[]){
         if(rangoDeDatosAEvaluar[0] >= numeroDatos){
             // Mensaje de tag 0 es que el map no debe iniciarse
               MPI_Send(rangoDeDatosAEvaluar, 2, MPI_INT, i, 0, MPI_COMM_WORLD);
+			printf("\n Se utlizará un map menos que los solicitados\n");
         }   
         else{
             if(rangoDeDatosAEvaluar[1] > numeroDatos){
