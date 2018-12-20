@@ -15,11 +15,12 @@ int main(int argc, char *argv[]){
     MPI_Comm_size(MPI_COMM_WORLD,&numeroProcesos); 
     MPI_Comm_rank(MPI_COMM_WORLD,&idProceso); 
     
+	// Hacer reducción de datos de procesos Map 
     for(int i = 1; i < 10; i++){
-           // printf("\n Número de datos que empiezan por %i: %i \n", i,  map[i]);
             MPI_Reduce(&zero, &reduce, 1, MPI_INT, MPI_SUM, i, MPI_COMM_WORLD);
     }
     
+	// Enviar resultados a proceso Master
     MPI_Send(&reduce, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
    
     MPI_Finalize();

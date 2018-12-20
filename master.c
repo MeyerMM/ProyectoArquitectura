@@ -71,7 +71,9 @@ int main(int argc, char *argv[]){
     
     
     int acumDatos =0;
+	// Para cada proceso Map
     for(int i = 0 + numeroMaster + numeroReduce; i<numeroProcesos; i++){
+		 // Calcular qué rango de datos evalúa
         rangoDeDatosAEvaluar[0] = acumDatos;
         rangoDeDatosAEvaluar[1] = acumDatos + datosPorMap;
         
@@ -83,12 +85,13 @@ int main(int argc, char *argv[]){
             if(rangoDeDatosAEvaluar[1] > numeroDatos){
                 rangoDeDatosAEvaluar[1] = numeroDatos;
             }
-            // Mensaje de tag 1 permite iniciar el map
+             // Mensaje de tag 1 permite iniciar el map. El buffer le indica al Map qué rango de datos evalúa.
             MPI_Send(rangoDeDatosAEvaluar, 2, MPI_INT, i, 1, MPI_COMM_WORLD);
             acumDatos += datosPorMap;
         }
     }   
     
+	// Recibir resultados de procesos reduce
     for(int i = 1; i < 10; i++){
         MPI_Reduce(&zero, &zero, 1, MPI_INT, MPI_SUM, i, MPI_COMM_WORLD);
     }
