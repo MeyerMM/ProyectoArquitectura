@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     int numeroProcesos;
     int idProceso;
     int zero = 0;
-	MPI_Comm reduce_comm;
+	MPI_Comm reduce_comm[9];
 
     MPI_Status status; 
     
@@ -62,12 +62,16 @@ int main(int argc, char *argv[])
     // Tag 1: Iniciar Map
     // Recibir en el buffer posición de inicio de datos (incluido) y posición de fin de datos (no incluido)
     MPI_Recv(rangoDeDatosAEvaluar, 2, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-     //printf("\n Map de id %i recibio tag %i\n", idProceso, status.MPI_TAG);
     if(status.MPI_TAG == 1){
-        //printf("\n Map de id %i evalua datos desde %i (inclusive) a %i \n", idProceso, rangoDeDatosAEvaluar[0], rangoDeDatosAEvaluar[1]);
+         // Hacer división de comunicadores para que cada reduce tenga un comunicador solo con los procesos Map
+        for(int i = 1; i < 10; i++){
+            MPI_Comm_split(MPI_COMM_WORLD, i, idProceso, &(reduce_comm[i-1]));
+        }
+        
+        // Solicitar espacio para guardar datos a evaluar y luego leer los datos y guardarlos
         datos = calloc(rangoDeDatosAEvaluar[1] - rangoDeDatosAEvaluar[0], sizeof(int));
         leerDatos(rangoDeDatosAEvaluar[0], rangoDeDatosAEvaluar[1]);     
-        
+        // Para cada dato
         for(int i = 0; i < (rangoDeDatosAEvaluar[1] - rangoDeDatosAEvaluar[0]); i++){
             int datoEnEvaluacion = datos[i];
             int digitoEnEvaluacion;
@@ -76,22 +80,21 @@ int main(int argc, char *argv[])
                 digitoEnEvaluacion = datoEnEvaluacion%10;
                 datoEnEvaluacion = datoEnEvaluacion/10;
             }
+            // Contabilizarlo según cuál sea su primer dígito
             map[digitoEnEvaluacion]++;
         }
 		free(datos);
-	
+        // Enviar resultados a los distintos reduce
         for(int i = 1; i < 10; i++){
-           // printf("\n Número de datos que empiezan por %i: %i \n", i,  map[i]);
-			
-			MPI_Comm_split(MPI_COMM_WORLD, i, idProceso, &reduce_comm);
-            MPI_Reduce(&(map[i]), &(map[i]), 1, MPI_INT, MPI_SUM, i, reduce_comm);
-
+            //printf("\nMap halló %i datos que empiezan por %i\n", map[i], i);
+            MPI_Reduce(&(map[i]), &(map[i]), 1, MPI_INT, MPI_SUM, 0, reduce_comm[i-1]);
         }
     }
     
     else{
+        // Si el map no va a ser iniciado, exclurilo de comunicadores con procesos Reduce
          for(int i = 1; i < 10; i++){
-            MPI_Comm_split(MPI_COMM_WORLD, i, MPI_UNDEFINED, &reduce_comm);
+            MPI_Comm_split(MPI_COMM_WORLD, MPI_UNDEFINED, idProceso, &(reduce_comm[i-1]));
 
         }
     }
