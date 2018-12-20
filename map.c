@@ -57,17 +57,17 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD,&numeroProcesos); 
     MPI_Comm_rank(MPI_COMM_WORLD,&idProceso); 
     
+    // Hacer división de comunicadores para que cada reduce tenga un comunicador solo con los procesos Map
+    for(int i = 1; i < 10; i++){
+        MPI_Comm_split(MPI_COMM_WORLD, i, idProceso, &(reduce_comm[i-1]));
+    }
     
     // Tag 0: No iniciar map
     // Tag 1: Iniciar Map
     // Recibir en el buffer posición de inicio de datos (incluido) y posición de fin de datos (no incluido)
     MPI_Recv(rangoDeDatosAEvaluar, 2, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
     if(status.MPI_TAG == 1){
-         // Hacer división de comunicadores para que cada reduce tenga un comunicador solo con los procesos Map
-        for(int i = 1; i < 10; i++){
-            MPI_Comm_split(MPI_COMM_WORLD, i, idProceso, &(reduce_comm[i-1]));
-        }
-        
+         
         // Solicitar espacio para guardar datos a evaluar y luego leer los datos y guardarlos
         datos = calloc(rangoDeDatosAEvaluar[1] - rangoDeDatosAEvaluar[0], sizeof(int));
         leerDatos(rangoDeDatosAEvaluar[0], rangoDeDatosAEvaluar[1]);     
@@ -92,10 +92,9 @@ int main(int argc, char *argv[])
     }
     
     else{
-        // Si el map no va a ser iniciado, exclurilo de comunicadores con procesos Reduce
+        // Si el map no va a ser iniciado, enviar cero al reduce
          for(int i = 1; i < 10; i++){
-            MPI_Comm_split(MPI_COMM_WORLD, MPI_UNDEFINED, idProceso, &(reduce_comm[i-1]));
-
+             MPI_Reduce(&(zero), &(map[i]), 1, MPI_INT, MPI_SUM, 0, reduce_comm[i-1]);
         }
     }
     

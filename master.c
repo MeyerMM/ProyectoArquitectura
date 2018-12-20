@@ -57,9 +57,17 @@ int main(int argc, char *argv[]){
     MPI_Comm_size(MPI_COMM_WORLD,&numeroProcesos); 
     MPI_Comm_rank(MPI_COMM_WORLD,&idProceso); 
     
+    
+    
+    double tiempoInicioSplit = MPI_Wtime();
+    // Excluir al Master de los comunicadores de procesos Reduce
+     for(int i = 1; i < 10; i++){
+        MPI_Comm_split(MPI_COMM_WORLD, MPI_UNDEFINED, idProceso, &reduce_comm);
+    }
+    double tiempoFinSplit = MPI_Wtime();
+    printf("\n El CommSplit tomo %g segundos en ejecutar\n", tiempoFinSplit - tiempoInicioSplit);
+    
     numeroMaps = numeroProcesos - numeroMaster - numeroReduce;
-    
-    
     contarDatos();
     printf("\n numero de datos: %i", numeroDatos);
     
@@ -91,16 +99,12 @@ int main(int argc, char *argv[]){
             acumDatos += datosPorMap;
         }
     }   
-    
-    // Excluir al Master de los comunicadores de procesos Reduce
-     for(int i = 1; i < 10; i++){
-        MPI_Comm_split(MPI_COMM_WORLD, MPI_UNDEFINED, idProceso, &reduce_comm);
-    }
 
     // Recibir resultados de procesos reduce
     for(int i = 1; i < 10; i++){
         MPI_Recv(&(resultados[i]), 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
     }
+    
     
     escribirResultados(resultados, numeroDatos);
 
