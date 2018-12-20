@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
     int numeroProcesos;
     int idProceso;
     int zero = 0;
+	MPI_Comm reduce_comm;
 
     MPI_Status status; 
     
@@ -70,6 +71,7 @@ int main(int argc, char *argv[])
         for(int i = 0; i < (rangoDeDatosAEvaluar[1] - rangoDeDatosAEvaluar[0]); i++){
             int datoEnEvaluacion = datos[i];
             int digitoEnEvaluacion;
+			// Extraer el primer dígito
             while(datoEnEvaluacion != 0){
                 digitoEnEvaluacion = datoEnEvaluacion%10;
                 datoEnEvaluacion = datoEnEvaluacion/10;
@@ -77,16 +79,19 @@ int main(int argc, char *argv[])
             map[digitoEnEvaluacion]++;
         }
 		free(datos);
+	
         for(int i = 1; i < 10; i++){
            // printf("\n Número de datos que empiezan por %i: %i \n", i,  map[i]);
-            MPI_Reduce(&(map[i]), &(map[i]), 1, MPI_INT, MPI_SUM, i, MPI_COMM_WORLD);
+			
+			MPI_Comm_split(MPI_COMM_WORLD, i, idProceso, &reduce_comm);
+            MPI_Reduce(&(map[i]), &(map[i]), 1, MPI_INT, MPI_SUM, i, reduce_comm);
 
         }
     }
     
     else{
          for(int i = 1; i < 10; i++){
-            MPI_Reduce(&zero, &zero, 1, MPI_INT, MPI_SUM, i, MPI_COMM_WORLD);
+            MPI_Comm_split(MPI_COMM_WORLD, i, MPI_UNDEFINED, &reduce_comm);
 
         }
     }
