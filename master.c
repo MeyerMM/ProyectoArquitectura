@@ -39,6 +39,9 @@ int escribirResultados(int resultados[], int numeroDatos){
 int main(int argc, char *argv[]){
     
     double tiempoInicio = MPI_Wtime();
+	double tiempoPasoDeMensajes = 0;
+	double tiempoInicioPasoDeMensajes = 0;
+	double tiempoFinPasoDeMensajes = 0;
     
     int numeroProcesos;
     int numeroMaster = 1;
@@ -79,7 +82,10 @@ int main(int argc, char *argv[]){
         
         if(rangoDeDatosAEvaluar[0] >= numeroDatos){
             // Mensaje de tag 0 es que el map no debe iniciarse
-              MPI_Send(rangoDeDatosAEvaluar, 2, MPI_INT, i, 0, MPI_COMM_WORLD);
+			tiempoInicioPasoDeMensajes = MPI_Wtime();
+            MPI_Send(rangoDeDatosAEvaluar, 2, MPI_INT, i, 0, MPI_COMM_WORLD);
+			tiempoFinPasoDeMensajes = MPI_Wtime();
+			tiempoPasoDeMensajes = tiempoPasoDeMensajes + tiempoFinPasoDeMensajes - tiempoInicioPasoDeMensajes;
 			printf("\n Se utlizará un map menos que los solicitados\n");
         }   
         else{
@@ -87,11 +93,14 @@ int main(int argc, char *argv[]){
                 rangoDeDatosAEvaluar[1] = numeroDatos;
             }
              // Mensaje de tag 1 permite iniciar el map. El buffer le indica al Map qué rango de datos evalúa.
+			tiempoInicioPasoDeMensajes = MPI_Wtime();
             MPI_Send(rangoDeDatosAEvaluar, 2, MPI_INT, i, 1, MPI_COMM_WORLD);
+			tiempoFinPasoDeMensajes = MPI_Wtime();
+			tiempoPasoDeMensajes = tiempoPasoDeMensajes + tiempoFinPasoDeMensajes - tiempoInicioPasoDeMensajes;
             acumDatos += datosPorMap;
         }
     }   
-    
+    tiempoInicioPasoDeMensajes = MPI_Wtime();
 	// Recibir resultados de procesos reduce
     for(int i = 1; i < 10; i++){
         MPI_Reduce(&zero, &zero, 1, MPI_INT, MPI_SUM, i, MPI_COMM_WORLD);
@@ -100,6 +109,8 @@ int main(int argc, char *argv[]){
     for(int i = 1; i < 10; i++){
         MPI_Recv(&(resultados[i]), 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
     }
+	tiempoFinPasoDeMensajes = MPI_Wtime();
+	tiempoPasoDeMensajes = tiempoPasoDeMensajes + tiempoFinPasoDeMensajes - tiempoInicioPasoDeMensajes;
     
     escribirResultados(resultados, numeroDatos);
 
@@ -108,6 +119,8 @@ int main(int argc, char *argv[]){
     
     double tiempoFin = MPI_Wtime();
     printf("\n El programa tomo %g segundos en ejecutar\n", tiempoFin - tiempoInicio);
+	printf("\n El programa tomo %g segundos pasando mensajes\n", tiempoPasoDeMensajes);
+	printf("\n El %g/% del tiempo de ejecucion transcurrio en el pase de mensajes\n", 100.0* tiempoPasoDeMensajes/(tiempoFin - tiempoInicio));
     return 0;
 }
  
