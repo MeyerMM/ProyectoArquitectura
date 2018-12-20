@@ -120,7 +120,7 @@ int main(int argc, char *argv[]){
     double tiempoFin = MPI_Wtime();
     printf("\n El programa tomo %g segundos en ejecutar\n", tiempoFin - tiempoInicio);
 	printf("\n El programa tomo %g segundos pasando mensajes\n", tiempoPasoDeMensajes);
-	printf("\n El %g/% del tiempo de ejecucion transcurrio en el pase de mensajes\n", 100.0* tiempoPasoDeMensajes/(tiempoFin - tiempoInicio));
+	printf("\n El %g porciento del tiempo de ejecucion transcurrio en el pase de mensajes\n", 100.0* tiempoPasoDeMensajes/(tiempoFin - tiempoInicio));
     return 0;
 }
  
